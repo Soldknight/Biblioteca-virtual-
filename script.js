@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // ⚙️ CONFIGURACIÓN VITAL DE PDF.JS 
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-    // --- 🚀 PANTALLA DE CARGA ---
     setTimeout(() => {
         const loader = document.getElementById("loader");
         if(loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 1000); }
@@ -19,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const total = books.length;
     const radius = 260;
 
-    // 🔥 POSICIÓN 3D
     books.forEach((book, i) => {
         const theta = (360 / total) * i;
         book.style.setProperty("--rotate", `${theta}deg`);
@@ -28,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let galaxyVelocityX = 0;
 
-    // 🎮 BOTONES ROTACIÓN
     document.getElementById("next").addEventListener("click", () => rotate(1));
     document.getElementById("prev").addEventListener("click", () => rotate(-1));
 
@@ -38,38 +34,33 @@ document.addEventListener("DOMContentLoaded", () => {
         galaxyVelocityX = direction * 15; 
     }
 
-    // --- 📖 LÓGICA DE PDF.JS ---
     const pdfCanvas = document.getElementById('pdfCanvas');
     const ctxPdf = pdfCanvas.getContext('2d');
     let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumIsPending = null;
     let currentPdfUrl = "";
 
-    // Escala inicial
+    // Escala visual inicial
     let currentScale = window.innerWidth < 600 ? 0.9 : 1.2;
 
     const renderPage = num => {
         pageIsRendering = true;
         pdfDoc.getPage(num).then(page => {
-            const viewport = page.getViewport({ scale: currentScale }); 
+            // 🔥 MOTOR ULTRA-HD (Oversampling) 🔥
+            // Renderizamos internamente a una escala 3 veces mayor
+            const renderScale = currentScale * 3; 
+            const viewport = page.getViewport({ scale: renderScale });
 
-            // 🔥 MAGIA PARA ALTA DEFINICIÓN (Evita el pixelado en móviles) 🔥
-            const outputScale = window.devicePixelRatio || 1;
-            
-            // Le damos al canvas el tamaño físico multiplicado por la calidad de tu pantalla
-            pdfCanvas.width = Math.floor(viewport.width * outputScale);
-            pdfCanvas.height = Math.floor(viewport.height * outputScale);
-            
-            // Usamos CSS para mantener el tamaño visual correcto
-            pdfCanvas.style.width = Math.floor(viewport.width) + "px";
-            pdfCanvas.style.height =  Math.floor(viewport.height) + "px";
+            // El canvas tiene miles de píxeles internos
+            pdfCanvas.width = viewport.width;
+            pdfCanvas.height = viewport.height;
 
-            const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+            // Pero con CSS le decimos que ocupe el tamaño visual normal
+            // Esto comprime los píxeles y genera la alta definición
+            const visualViewport = page.getViewport({ scale: currentScale });
+            pdfCanvas.style.width = Math.floor(visualViewport.width) + "px";
+            pdfCanvas.style.height = Math.floor(visualViewport.height) + "px";
 
-            const renderCtx = { 
-                canvasContext: ctxPdf, 
-                transform: transform,
-                viewport: viewport 
-            };
+            const renderCtx = { canvasContext: ctxPdf, viewport: viewport };
 
             page.render(renderCtx).promise.then(() => {
                 pageIsRendering = false;
@@ -87,7 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
         else renderPage(num);
     };
 
-    // 📚 CLICK LIBROS
     books.forEach(book => {
         book.addEventListener("click", () => {
             if (book.classList.contains("proximamente")) {
@@ -96,46 +86,33 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             currentPdfUrl = book.dataset.pdf;
-            
             if (sound) { sound.currentTime = 0; sound.play(); }
 
             visor.classList.add("activo");
             titulo.textContent = currentPdfUrl.split("/").pop().replace('.pdf', '').replace(/-/g, ' ');
 
-            // 🔥 RECUPERAR PROGRESO GUARDADO
             let savedPage = localStorage.getItem(`progreso_${currentPdfUrl}`);
             pageNum = savedPage ? parseInt(savedPage) : 1;
 
             pdfCanvas.style.opacity = "0.5"; 
             pdfjsLib.getDocument(currentPdfUrl).promise.then(pdfDoc_ => {
                 pdfDoc = pdfDoc_;
-                
                 if(pageNum > pdfDoc.numPages) pageNum = 1;
-
                 renderPage(pageNum);
                 pdfCanvas.style.opacity = "1";
-                
-                // Resetear zoom al abrir
                 currentScale = window.innerWidth < 600 ? 0.9 : 1.2; 
             }).catch(err => {
-                console.error("Error cargando PDF:", err);
-                ctxPdf.fillStyle = "white"; ctxPdf.font = "20px Arial";
-                ctxPdf.fillText("Error al cargar el PDF. Verifica la ruta.", 50, 50);
+                console.error("Error:", err);
             });
         });
     });
 
-    // ❌ CERRAR
     cerrar.addEventListener("click", () => {
         visor.classList.remove("activo");
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-            document.getElementById("btnFullscreen").textContent = "⛶ EXPANDIR";
-        }
+        if (document.fullscreenElement) document.exitFullscreen();
         setTimeout(() => { ctxPdf.clearRect(0, 0, pdfCanvas.width, pdfCanvas.height); pdfDoc = null; }, 400);
     });
 
-    // 📖 NAVEGACIÓN
     document.getElementById("prevPage").addEventListener("click", () => {
         if (pageNum <= 1) return;
         pageNum--;
@@ -154,44 +131,35 @@ document.addEventListener("DOMContentLoaded", () => {
         queueRenderPage(pageNum);
     });
 
-    // 🔍 LÓGICA DE ZOOM
     document.getElementById("btnZoomIn").addEventListener("click", () => {
         currentScale += 0.3; 
         queueRenderPage(pageNum); 
     });
 
     document.getElementById("btnZoomOut").addEventListener("click", () => {
-        if (currentScale > 0.6) { 
+        if (currentScale > 0.4) { 
             currentScale -= 0.3; 
             queueRenderPage(pageNum);
         }
     });
 
-    // 💾 LÓGICA GUARDAR PROGRESO
     document.getElementById("btnGuardar").addEventListener("click", () => {
         if(currentPdfUrl) {
             localStorage.setItem(`progreso_${currentPdfUrl}`, pageNum);
-            
             let btn = document.getElementById("btnGuardar");
             let originalText = btn.textContent;
             btn.textContent = "✔️ GUARDADO";
             btn.style.background = "linear-gradient(180deg, #33cc33, #009900)";
-            
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.background = ""; 
-            }, 1500);
+            setTimeout(() => { btn.textContent = originalText; btn.style.background = ""; }, 1500);
         }
     });
 
-    // 🌙 MODO DESCANSO
     const btnDescanso = document.getElementById("btnDescanso");
     btnDescanso.addEventListener("click", () => {
         visor.classList.toggle("modo-descanso");
         btnDescanso.textContent = visor.classList.contains("modo-descanso") ? "☀️ NORMAL" : "🌙 DESCANSO";
     });
 
-    // ⛶ PANTALLA COMPLETA
     const btnFullscreen = document.getElementById("btnFullscreen");
     btnFullscreen.addEventListener("click", () => {
         if (!document.fullscreenElement) {
@@ -200,12 +168,10 @@ document.addEventListener("DOMContentLoaded", () => {
             btnFullscreen.textContent = "🗗 REDUCIR";
         } else {
             if (document.exitFullscreen) document.exitFullscreen();
-            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
             btnFullscreen.textContent = "⛶ EXPANDIR";
         }
     });
 
-    // 📱 SWIPE
     let startX = 0;
     document.addEventListener("touchstart", e => { startX = e.touches[0].clientX; });
     document.addEventListener("touchend", e => {
@@ -216,23 +182,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 🌌 GALAXIA
     const canvasGal = document.getElementById("galaxy");
     const ctxGal = canvasGal.getContext("2d");
-
     function resizeCanvas() { canvasGal.width = window.innerWidth; canvasGal.height = window.innerHeight; }
     resizeCanvas(); window.addEventListener("resize", resizeCanvas);
-
     let stars = [];
     for (let i = 0; i < 2000; i++) {
         stars.push({ x: Math.random() * canvasGal.width - canvasGal.width / 2, y: Math.random() * canvasGal.height - canvasGal.height / 2, z: Math.random() * canvasGal.width });
     }
-
     function animateGalaxy() {
         ctxGal.fillStyle = "black"; ctxGal.fillRect(0, 0, canvasGal.width, canvasGal.height); ctxGal.fillStyle = "white";
         stars.forEach(star => {
-            star.z -= 0.3; 
-            star.x += galaxyVelocityX;
+            star.z -= 0.3; star.x += galaxyVelocityX;
             if (star.z <= 0) { star.z = canvasGal.width; star.x = Math.random() * canvasGal.width - canvasGal.width / 2; star.y = Math.random() * canvasGal.height - canvasGal.height / 2; }
             if (star.x > canvasGal.width / 2) star.x = -canvasGal.width / 2;
             if (star.x < -canvasGal.width / 2) star.x = canvasGal.width / 2;
