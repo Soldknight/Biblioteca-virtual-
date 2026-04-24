@@ -1,80 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Biblioteca de mi Paletita</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca de mi Paletita</title>
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
 
 <body>
-    <canvas id="stars"></canvas>
 
-<h1 class="titulo">Tu biblioteca digital💕</h1>
-
-<div class="container">
-    <div class="carousel" id="carousel">
-<div class="book" data-pdf="libros/hipotesis-amor.pdf">
-    <img src="portadas/hipotesis-amor.jpg">
-</div>
-
-<div class="book" data-pdf="libros/quimica-amor.pdf">
-    <img src="portadas/quimica-amor.jpg">
-</div>
-
-<div class="book" data-pdf="libros/love-theoretically.pdf">
-    <img src="portadas/love-theoretically.jpg">
-</div> 
-
-<div class="book" data-pdf="libros/jaque-mate-amor.pdf">
-    <img src="portadas/jaque-mate-amor.jpg">
-</div>
-
-<div class="book" data-pdf="libros/novia.pdf">
-    <img src="portadas/novia.jpg">
-</div>
-
-<div class="book" data-pdf="libros/below-zero.pdf">
-    <img src="portadas/below-zero.jpg">
-</div>
-
-<div class="book" data-pdf="libros/no-es-amor.pdf">
-    <img src="portadas/no-es-amor.jpg">
-</div>
-
-<div class="book proximamente" data-pdf="libros/juego-de-dos.pdf">
-    <img src="portadas/juego-de-dos.jpg">
-</div>
-
-<div class="book" data-pdf="libros/caida-libre.pdf">
-    <img src="portadas/caida-libre.jpg">
-</div>
-
-    </div>
-</div>
-
-<div class="controls">
-    <button id="prev">⬅️</button>
-    <button id="next">➡️</button>
-</div>
-
-<p class="info">Desliza o usa los botones para cambiar de libro 📚</p>
-
-<script src="script.js"></script>
-
-<!-- 📖 VISOR PDF -->
-<div id="visor" class="visor oculto">
-    
-    <div class="visor-header">
-        <button id="cerrar">✖</button>
-        <span id="tituloLibro">Leyendo...</span>
+    <div id="loader">
+        <div class="loader-spinner"></div>
+        <h2>Viajando a la biblioteca... 🚀</h2>
     </div>
 
-    <iframe id="pdfViewer"></iframe>
+    <canvas id="galaxy"></canvas>
 
-</div>
+    <audio id="openSound" src="sonido.mp3"></audio>
 
+    <h1 class="titulo">Tu biblioteca digital 💕</h1>
+
+    <div class="container">
+        <div class="carousel" id="carousel">
+
+            <div class="book" data-pdf="libros/hipotesis-amor.pdf">
+                <img src="portadas/hipotesis-amor.jpg" alt="La hipótesis del amor">
+            </div>
+
+            <div class="book" data-pdf="libros/quimica-amor.pdf">
+                <img src="portadas/quimica-amor.jpg" alt="La química del amor">
+            </div>
+
+            <div class="book" data-pdf="libros/love-theoretically.pdf">
+                <img src="portadas/love-theoretically.jpg" alt="Love Theoretically">
+            </div> 
+
+            <div class="book" data-pdf="libros/jaque-mate-amor.pdf">
+                <img src="portadas/jaque-mate-amor.jpg" alt="Jaque mate al amor">
+            </div>
+
+            <div class="book" data-pdf="libros/novia.pdf">
+                <img src="portadas/novia.jpg" alt="Novia">
+            </div>
+
+            <div class="book" data-pdf="libros/below-zero.pdf">
+                <img src="portadas/below-zero.jpg" alt="Below Zero">
+            </div>
+
+            <div class="book" data-pdf="libros/no-es-amor.pdf">
+                <img src="portadas/no-es-amor.jpg" alt="No es amor">
+            </div>
+
+            <div class="book proximamente" data-pdf="libros/juego-de-dos.pdf">
+                <img src="portadas/juego-de-dos.jpg" alt="Juego de dos">
+            </div>
+
+            <div class="book" data-pdf="libros/caida-libre.pdf">
+                <img src="portadas/caida-libre.jpg" alt="Caída libre">
+            </div>
+
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="prev">⬅️</button>
+        <button id="next">➡️</button>
+    </div>
+
+    <p class="info" style="text-align: center;">Desliza o usa los botones para cambiar de libro 📚</p>
+
+    <div id="visor" class="visor">
+
+        <div class="visor-header">
+            <button id="cerrar">✖</button>
+            <span id="tituloLibro">Leyendo...</span>
+        </div>
+
+        <div class="nav-pdf">
+            <button id="prevPage">⬅ Página Anterior</button>
+            <span id="pageCount" style="color: white; font-weight: bold;">Página: <span id="pageNum">1</span></span>
+            <button id="nextPage">Página Siguiente ➡</button>
+        </div>
+
+        <div id="pdf-container">
+            <canvas id="pdfCanvas"></canvas>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
 
 </body>
 </html>

@@ -1,124 +1,219 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // ⚙️ CONFIGURACIÓN VITAL DE PDF.JS (Para que no se trabe)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    // --- 🚀 PANTALLA DE CARGA ÉPICA ---
+    setTimeout(() => {
+        const loader = document.getElementById("loader");
+        if(loader) {
+            loader.style.opacity = "0";
+            setTimeout(() => loader.remove(), 1000);
+        }
+    }, 1500);
 
     const carousel = document.getElementById("carousel");
     const books = document.querySelectorAll(".book");
+    const visor = document.getElementById("visor");
+    const cerrar = document.getElementById("cerrar");
+    const titulo = document.getElementById("tituloLibro");
+    const sound = document.getElementById("openSound");
 
     let angle = 0;
     const total = books.length;
     const radius = 260;
 
-    // 🔥 POSICIÓN 3D SIN CONFLICTO
+    // 🔥 POSICIÓN 3D DE LOS LIBROS
     books.forEach((book, i) => {
         const theta = (360 / total) * i;
-
-        // 👉 usamos variables en vez de transform directo
         book.style.setProperty("--rotate", `${theta}deg`);
         book.style.setProperty("--z", `${radius}px`);
     });
 
-    // BOTONES
+    // 🌟 INERCIA DE GALAXIA
+    let galaxyVelocityX = 0;
+
+    // 🎮 BOTONES Y ROTACIÓN DEL CARRUSEL
     document.getElementById("next").addEventListener("click", () => rotate(1));
     document.getElementById("prev").addEventListener("click", () => rotate(-1));
 
     function rotate(direction) {
         angle += direction * (360 / total);
         carousel.style.transform = `rotateY(${angle}deg)`;
+        
+        // Darle un empujón a la galaxia cuando rotas el carrusel
+        galaxyVelocityX = direction * 15; 
     }
 
-    // CLICK LIBROS
+    // --- 📖 LÓGICA DE PDF.JS (EL LECTOR REAL) ---
+    const pdfCanvas = document.getElementById('pdfCanvas');
+    const ctxPdf = pdfCanvas.getContext('2d');
+    let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumIsPending = null;
+
+    const renderPage = num => {
+        pageIsRendering = true;
+        pdfDoc.getPage(num).then(page => {
+            const viewport = page.getViewport({ scale: 1.2 }); // Ajusta el zoom aquí si lo necesitas
+            pdfCanvas.height = viewport.height;
+            pdfCanvas.width = viewport.width;
+
+            const renderCtx = { canvasContext: ctxPdf, viewport: viewport };
+            page.render(renderCtx).promise.then(() => {
+                pageIsRendering = false;
+                if (pageNumIsPending !== null) {
+                    renderPage(pageNumIsPending);
+                    pageNumIsPending = null;
+                }
+            });
+            document.getElementById('pageNum').textContent = num;
+        });
+    };
+
+    const queueRenderPage = num => {
+        if (pageIsRendering) pageNumIsPending = num;
+        else renderPage(num);
+    };
+
+    // 📚 CLICK EN LOS LIBROS (ANIMACIÓN NETFLIX)
     books.forEach(book => {
         book.addEventListener("click", () => {
-
             if (book.classList.contains("proximamente")) {
                 alert("📚 Este libro estará disponible pronto 💕");
                 return;
             }
 
-            const pdf = book.dataset.pdf;
-           const visor = document.getElementById("visor");
-const pdfViewer = document.getElementById("pdfViewer");
-const cerrar = document.getElementById("cerrar");
-const titulo = document.getElementById("tituloLibro");
+            const pdfUrl = book.dataset.pdf;
+            
+            // 🔊 Reproducir Sonido
+            if (sound) { 
+                sound.currentTime = 0; 
+                sound.play(); 
+            }
 
-books.forEach(book => {
-    book.addEventListener("click", () => {
+            // 💾 Guardar progreso (Tu código original restaurado)
+            localStorage.setItem("ultimoLibro", pdfUrl);
 
-        if (book.classList.contains("proximamente")) {
-            alert("📚 Este libro estará disponible pronto 💕");
-            return;
-        }
+            // 📖 Abrir visor con animación
+            visor.classList.add("activo");
+            titulo.textContent = pdfUrl.split("/").pop().replace('.pdf', '').replace(/-/g, ' '); // Formatea el título un poco mejor
 
-        const pdf = book.dataset.pdf;
-
-        // 📖 abrir visor
-        visor.classList.add("activo");
-        pdfViewer.src = pdf;
-
-        // título dinámico
-        titulo.textContent = pdf.split("/").pop();
-    });
-});
-
-// ❌ cerrar visor
-cerrar.addEventListener("click", () => {
-    visor.classList.remove("activo");
-    pdfViewer.src = "";
-});
+            // 📄 Cargar documento PDF real
+            pdfCanvas.style.opacity = "0.5"; // Efecto visual mientras carga
+            pdfjsLib.getDocument(pdfUrl).promise.then(pdfDoc_ => {
+                pdfDoc = pdfDoc_;
+                pageNum = 1;
+                renderPage(pageNum);
+                pdfCanvas.style.opacity = "1";
+            }).catch(err => {
+                console.error("Error cargando PDF:", err);
+                ctxPdf.fillStyle = "white";
+                ctxPdf.font = "20px Arial";
+                ctxPdf.fillText("Error al cargar el PDF. Verifica la ruta.", 50, 50);
+            });
         });
     });
 
-    // 📱 SWIPE
-    let startX = 0;
-
-    document.addEventListener("touchstart", e => {
-        startX = e.touches[0].clientX;
+    // ❌ CERRAR VISOR
+    cerrar.addEventListener("click", () => {
+        visor.classList.remove("activo");
+        // Limpiamos el canvas después de que termine la animación de cierre
+        setTimeout(() => { 
+            ctxPdf.clearRect(0, 0, pdfCanvas.width, pdfCanvas.height); 
+            pdfDoc = null;
+        }, 400);
     });
 
+    // 📖 NAVEGACIÓN DE PÁGINAS (CON EFECTO FÍSICO)
+    document.getElementById("prevPage").addEventListener("click", () => {
+        if (pageNum <= 1) return;
+        pageNum--;
+        
+        pdfCanvas.classList.remove("page-turning-left", "page-turning-right");
+        void pdfCanvas.offsetWidth; // Truco para reiniciar la animación CSS
+        pdfCanvas.classList.add("page-turning-left");
+        
+        queueRenderPage(pageNum);
+    });
+
+    document.getElementById("nextPage").addEventListener("click", () => {
+        if (pdfDoc && pageNum >= pdfDoc.numPages) return;
+        pageNum++;
+        
+        pdfCanvas.classList.remove("page-turning-left", "page-turning-right");
+        void pdfCanvas.offsetWidth; 
+        pdfCanvas.classList.add("page-turning-right");
+        
+        queueRenderPage(pageNum);
+    });
+
+    // 📱 SWIPE PARA MOVER EL CARRUSEL EN MÓVILES
+    let startX = 0;
+    document.addEventListener("touchstart", e => { startX = e.touches[0].clientX; });
     document.addEventListener("touchend", e => {
         let endX = e.changedTouches[0].clientX;
-
-        if (startX - endX > 50) rotate(1);
-        else if (endX - startX > 50) rotate(-1);
+        // Solo rotar si el visor de PDF está cerrado
+        if (!visor.classList.contains("activo")) {
+            if (startX - endX > 50) rotate(1);
+            else if (endX - startX > 50) rotate(-1);
+        }
     });
 
-    // 🌌 ESTRELLAS
-    const canvas = document.getElementById("stars");
-    const ctx = canvas.getContext("2d");
+    // 🌌 GALAXIA SINCRONIZADA CON MOVIMIENTO
+    const canvasGal = document.getElementById("galaxy");
+    const ctxGal = canvasGal.getContext("2d");
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    function resizeCanvas() {
+        canvasGal.width = window.innerWidth;
+        canvasGal.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
     let stars = [];
-
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 200; i++) {
         stars.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            size: Math.random() * 1.5,
-            speed: Math.random() * 0.3 + 0.1
+            x: Math.random() * canvasGal.width - canvasGal.width / 2,
+            y: Math.random() * canvasGal.height - canvasGal.height / 2,
+            z: Math.random() * canvasGal.width
         });
     }
 
-    function drawStars() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "#ffffff";
+    function animateGalaxy() {
+        ctxGal.fillStyle = "black";
+        ctxGal.fillRect(0, 0, canvasGal.width, canvasGal.height);
+        ctxGal.fillStyle = "white";
 
         stars.forEach(star => {
-            ctx.beginPath();
-            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-            ctx.fill();
+            // Movimiento normal hacia adelante
+            star.z -= 2; 
+            
+            // 🔥 Inercia lateral al mover el carrusel
+            star.x += galaxyVelocityX;
 
-            star.y += star.speed;
-
-            if (star.y > canvas.height) {
-                star.y = 0;
-                star.x = Math.random() * canvas.width;
+            if (star.z <= 0) {
+                star.z = canvasGal.width;
+                star.x = Math.random() * canvasGal.width - canvasGal.width / 2;
+                star.y = Math.random() * canvasGal.height - canvasGal.height / 2;
             }
+            
+            // Reciclar estrellas si se salen por los bordes
+            if (star.x > canvasGal.width / 2) star.x = -canvasGal.width / 2;
+            if (star.x < -canvasGal.width / 2) star.x = canvasGal.width / 2;
+
+            let k = 128 / star.z;
+            let x = star.x * k + canvasGal.width / 2;
+            let y = star.y * k + canvasGal.height / 2;
+            let size = (1 - star.z / canvasGal.width) * 3;
+
+            ctxGal.beginPath();
+            ctxGal.arc(x, y, size, 0, Math.PI * 2);
+            ctxGal.fill();
         });
 
-        requestAnimationFrame(drawStars);
-    }
+        // Fricción para que la galaxia se detenga suavemente
+        galaxyVelocityX *= 0.92; 
 
-    drawStars();
+        requestAnimationFrame(animateGalaxy);
+    }
+    
+    animateGalaxy();
 });
