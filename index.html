@@ -75,14 +75,19 @@
     <div id="visor" class="visor">
 
         <div class="visor-header">
-            <button id="cerrar">✖</button>
+            <button id="cerrar" class="btn-pildora btn-cyan">✖ SALIR</button>
             <span id="tituloLibro">Leyendo...</span>
+            
+            <div class="visor-tools">
+                <button id="btnDescanso" class="btn-pildora btn-blue">🌙 DESCANSO</button>
+                <button id="btnFullscreen" class="btn-pildora btn-blue">⛶ EXPANDIR</button>
+            </div>
         </div>
 
         <div class="nav-pdf">
-            <button id="prevPage">⬅ Página Anterior</button>
-            <span id="pageCount" style="color: white; font-weight: bold;">Página: <span id="pageNum">1</span></span>
-            <button id="nextPage">Página Siguiente ➡</button>
+            <button id="prevPage" class="btn-pildora btn-pink">« ANTERIOR</button>
+            <span id="pageCount" style="color: white; font-weight: bold;">PÁGINA: <span id="pageNum">1</span></span>
+            <button id="nextPage" class="btn-pildora btn-purple">SIGUIENTE »</button>
         </div>
 
         <div id="pdf-container">

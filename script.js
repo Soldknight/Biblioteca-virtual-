@@ -89,15 +89,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 sound.play(); 
             }
 
-            // 💾 Guardar progreso (Tu código original restaurado)
+            // 💾 Guardar progreso 
             localStorage.setItem("ultimoLibro", pdfUrl);
 
             // 📖 Abrir visor con animación
             visor.classList.add("activo");
-            titulo.textContent = pdfUrl.split("/").pop().replace('.pdf', '').replace(/-/g, ' '); // Formatea el título un poco mejor
+            titulo.textContent = pdfUrl.split("/").pop().replace('.pdf', '').replace(/-/g, ' ');
 
             // 📄 Cargar documento PDF real
-            pdfCanvas.style.opacity = "0.5"; // Efecto visual mientras carga
+            pdfCanvas.style.opacity = "0.5"; 
             pdfjsLib.getDocument(pdfUrl).promise.then(pdfDoc_ => {
                 pdfDoc = pdfDoc_;
                 pageNum = 1;
@@ -115,7 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // ❌ CERRAR VISOR
     cerrar.addEventListener("click", () => {
         visor.classList.remove("activo");
-        // Limpiamos el canvas después de que termine la animación de cierre
+        
+        // Si está en pantalla completa, salir automáticamente al cerrar el libro
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+            document.getElementById("btnFullscreen").textContent = "⛶ EXPANDIR";
+        }
+
         setTimeout(() => { 
             ctxPdf.clearRect(0, 0, pdfCanvas.width, pdfCanvas.height); 
             pdfDoc = null;
@@ -128,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pageNum--;
         
         pdfCanvas.classList.remove("page-turning-left", "page-turning-right");
-        void pdfCanvas.offsetWidth; // Truco para reiniciar la animación CSS
+        void pdfCanvas.offsetWidth; 
         pdfCanvas.classList.add("page-turning-left");
         
         queueRenderPage(pageNum);
@@ -145,19 +151,55 @@ document.addEventListener("DOMContentLoaded", () => {
         queueRenderPage(pageNum);
     });
 
+    // 🌙 LÓGICA MODO DESCANSO VISUAL
+    const btnDescanso = document.getElementById("btnDescanso");
+    btnDescanso.addEventListener("click", () => {
+        visor.classList.toggle("modo-descanso");
+        if (visor.classList.contains("modo-descanso")) {
+            btnDescanso.textContent = "☀️ MODO NORMAL";
+        } else {
+            btnDescanso.textContent = "🌙 DESCANSO";
+        }
+    });
+
+    // ⛶ LÓGICA PANTALLA COMPLETA
+    const btnFullscreen = document.getElementById("btnFullscreen");
+    btnFullscreen.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+            // Entrar a pantalla completa
+            if (visor.requestFullscreen) {
+                visor.requestFullscreen();
+            } else if (visor.webkitRequestFullscreen) { /* Safari */
+                visor.webkitRequestFullscreen();
+            } else if (visor.msRequestFullscreen) { /* IE11 */
+                visor.msRequestFullscreen();
+            }
+            btnFullscreen.textContent = "🗗 REDUCIR";
+        } else {
+            // Salir de pantalla completa
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+            btnFullscreen.textContent = "⛶ EXPANDIR";
+        }
+    });
+
     // 📱 SWIPE PARA MOVER EL CARRUSEL EN MÓVILES
     let startX = 0;
     document.addEventListener("touchstart", e => { startX = e.touches[0].clientX; });
     document.addEventListener("touchend", e => {
         let endX = e.changedTouches[0].clientX;
-        // Solo rotar si el visor de PDF está cerrado
         if (!visor.classList.contains("activo")) {
             if (startX - endX > 50) rotate(1);
             else if (endX - startX > 50) rotate(-1);
         }
     });
 
-    // 🌌 GALAXIA SINCRONIZADA CON MOVIMIENTO
+    // 🌌 GALAXIA SINCRONIZADA (MÁS LENTA Y CON MÁS ESTRELLAS)
     const canvasGal = document.getElementById("galaxy");
     const ctxGal = canvasGal.getContext("2d");
 
@@ -169,7 +211,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("resize", resizeCanvas);
 
     let stars = [];
-    for (let i = 0; i < 200; i++) {
+    // 🔥 Multiplicamos por 10 la cantidad de estrellas (Ahora son 2000)
+    for (let i = 0; i < 2000; i++) {
         stars.push({
             x: Math.random() * canvasGal.width - canvasGal.width / 2,
             y: Math.random() * canvasGal.height - canvasGal.height / 2,
@@ -183,10 +226,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ctxGal.fillStyle = "white";
 
         stars.forEach(star => {
-            // Movimiento normal hacia adelante
-            star.z -= 2; 
+            // 🔥 Reducimos drásticamente la velocidad frontal (de 2 a 0.3)
+            star.z -= 0.3; 
             
-            // 🔥 Inercia lateral al mover el carrusel
+            // Inercia lateral al mover el carrusel
             star.x += galaxyVelocityX;
 
             if (star.z <= 0) {
@@ -202,16 +245,15 @@ document.addEventListener("DOMContentLoaded", () => {
             let k = 128 / star.z;
             let x = star.x * k + canvasGal.width / 2;
             let y = star.y * k + canvasGal.height / 2;
-            let size = (1 - star.z / canvasGal.width) * 3;
+            // Ajustamos un poco el tamaño máximo para que no se vea saturado con tantas estrellas
+            let size = (1 - star.z / canvasGal.width) * 2; 
 
             ctxGal.beginPath();
             ctxGal.arc(x, y, size, 0, Math.PI * 2);
             ctxGal.fill();
         });
 
-        // Fricción para que la galaxia se detenga suavemente
         galaxyVelocityX *= 0.92; 
-
         requestAnimationFrame(animateGalaxy);
     }
     
