@@ -44,17 +44,33 @@ document.addEventListener("DOMContentLoaded", () => {
     let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumIsPending = null;
     let currentPdfUrl = "";
 
-    // 🔥 CORRECCIÓN: Tamaño inicial más pequeño en celular (0.9 en vez de 1.5)
+    // Escala inicial
     let currentScale = window.innerWidth < 600 ? 0.9 : 1.2;
 
     const renderPage = num => {
         pageIsRendering = true;
         pdfDoc.getPage(num).then(page => {
             const viewport = page.getViewport({ scale: currentScale }); 
-            pdfCanvas.height = viewport.height;
-            pdfCanvas.width = viewport.width;
 
-            const renderCtx = { canvasContext: ctxPdf, viewport: viewport };
+            // 🔥 MAGIA PARA ALTA DEFINICIÓN (Evita el pixelado en móviles) 🔥
+            const outputScale = window.devicePixelRatio || 1;
+            
+            // Le damos al canvas el tamaño físico multiplicado por la calidad de tu pantalla
+            pdfCanvas.width = Math.floor(viewport.width * outputScale);
+            pdfCanvas.height = Math.floor(viewport.height * outputScale);
+            
+            // Usamos CSS para mantener el tamaño visual correcto
+            pdfCanvas.style.width = Math.floor(viewport.width) + "px";
+            pdfCanvas.style.height =  Math.floor(viewport.height) + "px";
+
+            const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+            const renderCtx = { 
+                canvasContext: ctxPdf, 
+                transform: transform,
+                viewport: viewport 
+            };
+
             page.render(renderCtx).promise.then(() => {
                 pageIsRendering = false;
                 if (pageNumIsPending !== null) {
@@ -99,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderPage(pageNum);
                 pdfCanvas.style.opacity = "1";
                 
-                // 🔥 CORRECCIÓN: Resetear zoom a 0.9 en celular al abrir el libro
+                // Resetear zoom al abrir
                 currentScale = window.innerWidth < 600 ? 0.9 : 1.2; 
             }).catch(err => {
                 console.error("Error cargando PDF:", err);
