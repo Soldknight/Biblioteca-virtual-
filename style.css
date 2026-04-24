@@ -1,0 +1,155 @@
+body {
+    margin: 0;
+    background: #020617;
+    color: #e2e8f0;
+    font-family: Arial;
+    overflow: hidden;
+    text-align: center;
+}
+
+/* 🌌 FONDO ESTRELLAS */
+#stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* TÍTULO */
+.titulo {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #f1f5f9;
+}
+
+/* CONTENEDOR */
+.container {
+    perspective: 1200px;
+    width: 100%;
+    height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* CARRUSEL */
+.carousel {
+    width: 260px;
+    height: 360px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s ease;
+}
+
+/* 🔥 LIBROS (VERSIÓN CORRECTA) */
+.book {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 170px;
+    height: 250px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+
+    transform-style: preserve-3d;
+
+    /* 🔥 IMPORTANTE: usa variables */
+    transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z));
+
+    transition: transform 0.5s, box-shadow 0.5s;
+}
+
+/* 🔥 HOVER CORRECTO (NO ROMPE EL 3D) */
+.book:hover {
+    transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z)) scale(1.1);
+    box-shadow: 0 0 25px rgba(255, 77, 166, 0.6);
+}
+
+.book img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* BOTONES */
+.controls {
+    margin-top: 10px;
+}
+
+button {
+    padding: 12px 25px;
+    margin: 10px;
+    border: none;
+    background: rgba(255, 77, 166, 0.15);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 77, 166, 0.4);
+    box-shadow: 0 0 10px rgba(255, 77, 166, 0.3);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.1);
+    background: rgba(255, 77, 166, 0.3);
+    box-shadow: 0 0 20px rgba(255, 77, 166, 0.8);
+}
+
+/* TEXTO */
+.info {
+    font-size: 13px;
+    opacity: 0.6;
+}
+
+/* 📱 MÓVIL */
+@media (max-width: 600px) {
+    .carousel {
+        width: 200px;
+        height: 300px;
+    }
+
+    .book {
+        width: 140px;
+        height: 210px;
+    }
+
+    .titulo {
+        font-size: 18px;
+    }
+}
+
+/* 🔒 PROXIMAMENTE */
+.proximamente {
+    opacity: 0.6;
+    cursor: not-allowed;
+    position: relative;
+    filter: brightness(0.8);
+}
+
+/* 🔥 ETIQUETA SIN ROMPER 3D */
+.proximamente::after {
+    content: "Próximamente";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 12px;
+
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+
+    pointer-events: none;
+}
