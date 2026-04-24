@@ -199,16 +199,16 @@ body {
 }
 
 /* ========================================= */
-/* 🌙 MODO DESCANSO VISUAL */
+/* 🌙 MODO DESCANSO VISUAL (Modo Noche Real) */
 /* ========================================= */
-.modo-descanso #pdf-container { background: #1a1410; }
-.modo-descanso #pdfCanvas { filter: sepia(0.3) brightness(0.85) contrast(0.95); }
+.modo-descanso #pdf-container { 
+    background: #000000; 
+}
 
-/* ✨ EFECTO PASAR PÁGINA 3D */
-.page-turning-right { animation: turnRight 0.4s ease-in-out; }
-.page-turning-left { animation: turnLeft 0.4s ease-in-out; }
-@keyframes turnRight { 0% { transform: rotateY(0deg) scale(1); opacity: 1; } 50% { transform: rotateY(-90deg) scale(0.9); opacity: 0; } 51% { transform: rotateY(90deg) scale(0.9); opacity: 0; } 100% { transform: rotateY(0deg) scale(1); opacity: 1; } }
-@keyframes turnLeft { 0% { transform: rotateY(0deg) scale(1); opacity: 1; } 50% { transform: rotateY(90deg) scale(0.9); opacity: 0; } 51% { transform: rotateY(-90deg) scale(0.9); opacity: 0; } 100% { transform: rotateY(0deg) scale(1); opacity: 1; } }
+.modo-descanso #pdfCanvas { 
+    /* Esta magia invierte los colores: papel negro, letras blancas */
+    filter: invert(0.9) hue-rotate(180deg) brightness(0.9) contrast(1.1); 
+}
 
 /* ========================================= */
 /* 📱 MÓVIL (SÚPER COMPACTO Y CENTRADO) */
