@@ -4,7 +4,10 @@ body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
+    /* 🔥 BLOQUEO TOTAL DEL MENÚ (Cero rebotes en celular) 🔥 */
     overflow: hidden; 
+    overscroll-behavior: none; 
+    touch-action: none; /* Congela la pantalla en el menú */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -24,83 +27,73 @@ body {
 
 /* 🚀 PANTALLA DE CARGA */
 #loader {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #020617;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    transition: opacity 1s ease-out;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #020617; z-index: 9999; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; color: white; transition: opacity 1s ease-out;
 }
-
 .loader-spinner {
-    width: 60px; height: 60px;
-    border: 5px solid rgba(255, 77, 166, 0.3);
-    border-top-color: #ff4da6;
-    border-radius: 50%;
-    animation: spin 1s infinite linear;
-    margin-bottom: 20px;
+    width: 60px; height: 60px; border: 5px solid rgba(255, 77, 166, 0.3);
+    border-top-color: #ff4da6; border-radius: 50%; animation: spin 1s infinite linear; margin-bottom: 20px;
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
 .titulo {
-    margin: 0; 
-    font-size: 24px;
-    color: #f1f5f9;
-    text-align: center; 
-    text-shadow: 0 0 10px rgba(255,255,255,0.2);
+    margin: 0; font-size: 24px; color: #f1f5f9; text-align: center; text-shadow: 0 0 10px rgba(255,255,255,0.2);
 }
 
 .container {
-    perspective: 1200px;
-    width: 100%;
-    height: 400px; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px 0; 
+    perspective: 1200px; width: 100%; height: 400px; display: flex;
+    justify-content: center; align-items: center; margin: 20px 0; 
 }
 
 .carousel {
-    width: 260px;
-    height: 360px;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.8s ease;
+    width: 260px; height: 360px; position: relative; transform-style: preserve-3d; transition: transform 0.8s ease;
 }
 
 .book {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 170px;
-    height: 250px;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transform-style: preserve-3d;
-    transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z));
-    transition: transform 0.5s, box-shadow 0.5s;
+    position: absolute; top: 50%; left: 50%; width: 170px; height: 250px;
+    border-radius: 12px; overflow: hidden; cursor: pointer; transform-style: preserve-3d;
+    transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z)); transition: transform 0.5s, box-shadow 0.5s;
 }
 
 .book img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none; 
+    width: 100%; height: 100%; object-fit: cover; pointer-events: none; 
 }
 
 .book:hover {
-    transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z)) scale(1.1);
-    box-shadow: 0 0 25px rgba(255, 77, 166, 0.6);
+    transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z)) scale(1.1); box-shadow: 0 0 25px rgba(255, 77, 166, 0.6);
+}
+
+/* 🔥 RESTAURADO EL DISEÑO DE "PRÓXIMAMENTE" 🔥 */
+.proximamente {
+    opacity: 0.6;
+    cursor: not-allowed;
+    position: relative;
+    filter: brightness(0.8);
+}
+
+.proximamente::after {
+    content: "Próximamente";
+    position: absolute;
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 35px; /* Un poco más alto para que se lea mejor */
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    background: rgba(0,0,0,0.8); /* Fondo negro semi-transparente */
+    color: #fff; 
+    font-size: 14px; /* Letra más grande */
+    font-weight: bold;
+    border-bottom-left-radius: 12px; 
+    border-bottom-right-radius: 12px;
+    pointer-events: none; /* Asegura que el clic pase al JavaScript */
+    z-index: 10;
 }
 
 .controls {
-    display: flex; justify-content: center; gap: 20px;
-    margin-top: 10px; width: 100%;
+    display: flex; justify-content: center; gap: 20px; margin-top: 10px; width: 100%;
 }
 
 .info {
@@ -111,9 +104,7 @@ body {
 .btn-pildora {
     border: 4px solid #000; border-radius: 50px; color: white; font-weight: 900;
     font-family: 'Arial', sans-serif; letter-spacing: 1.5px;
-    padding: 10px 24px; cursor: pointer;
-    box-shadow: 0px 6px 0px #000; transition: transform 0.1s, box-shadow 0.1s;
-    margin: 0 2px;
+    padding: 10px 24px; cursor: pointer; box-shadow: 0px 6px 0px #000; transition: transform 0.1s, box-shadow 0.1s; margin: 0 2px;
 }
 .btn-pildora:active { transform: translateY(6px); box-shadow: 0px 0px 0px #000; }
 .btn-pink { background: linear-gradient(180deg, #ff99cc, #ff33cc); }
@@ -127,51 +118,35 @@ body {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: #020617; z-index: 999; display: flex; flex-direction: column;
     opacity: 0; pointer-events: none; backdrop-filter: blur(10px);
+    /* 🔥 SE LIBERA EL SCROLL ADENTRO DEL LIBRO 🔥 */
+    touch-action: auto; 
 }
 .visor.activo {
-    opacity: 1; pointer-events: auto;
-    animation: netflixOpen 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 1; pointer-events: auto; animation: netflixOpen 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-@keyframes netflixOpen {
-    0% { opacity: 0; transform: scale(0.5) translateY(100px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
-}
+@keyframes netflixOpen { 0% { opacity: 0; transform: scale(0.5) translateY(100px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 
 .visor-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 20px; background: rgba(0,0,0,0.6); color: #fff;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: rgba(0,0,0,0.6); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .nav-pdf {
-    display: flex; justify-content: center; align-items: center; gap: 10px;
-    padding: 10px; background: #0f172a; color: white; z-index: 2;
+    display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px; background: #0f172a; color: white; z-index: 2;
 }
 
-/* 🔥 ARREGLO DE SCROLL E IZQUIERDA CORTADA 🔥 */
 #pdf-container {
-    flex-grow: 1; 
-    display: block; /* IMPORTANTE: Quitamos flex para evitar el recorte izquierdo */
-    background: #0a0a0a; 
-    overflow: auto; 
-    -webkit-overflow-scrolling: touch; 
-    padding: 20px;
-    text-align: center; /* Centra el canvas cuando es más pequeño que la pantalla */
+    flex-grow: 1; display: block; background: #0a0a0a; 
+    overflow: auto; -webkit-overflow-scrolling: touch; 
+    padding: 20px; text-align: center; width: 100%; box-sizing: border-box;
 }
 
 #pdfCanvas {
-    display: inline-block; /* Permite el centrado con text-align: center */
-    margin: 0 auto;
-    box-shadow: 0 0 30px rgba(0,0,0,0.8);
-    background: white;
+    display: inline-block; margin: 0 auto; box-shadow: 0 0 30px rgba(0,0,0,0.8); background: white;
 }
 
 /* 🌙 MODO DESCANSO (BLINDADO) */
 .modo-descanso #pdf-container { background: #000000 !important; }
-.modo-descanso #pdfCanvas { 
-    -webkit-filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(1.2) !important;
-    filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(1.2) !important; 
-}
+.modo-descanso #pdfCanvas { -webkit-filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(1.2) !important; filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(1.2) !important; }
 
 /* ✨ EFECTO PASAR PÁGINA */
 .page-turning-right { animation: turnRight 0.4s ease-in-out; }

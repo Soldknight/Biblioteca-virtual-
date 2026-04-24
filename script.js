@@ -39,23 +39,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumIsPending = null;
     let currentPdfUrl = "";
 
-    // Escala visual inicial
     let currentScale = window.innerWidth < 600 ? 0.9 : 1.2;
 
     const renderPage = num => {
         pageIsRendering = true;
         pdfDoc.getPage(num).then(page => {
-            // 🔥 MOTOR ULTRA-HD (Oversampling) 🔥
-            // Renderizamos internamente a una escala 3 veces mayor
+            // Motor Alta Definición (Oversampling)
             const renderScale = currentScale * 3; 
             const viewport = page.getViewport({ scale: renderScale });
 
-            // El canvas tiene miles de píxeles internos
             pdfCanvas.width = viewport.width;
             pdfCanvas.height = viewport.height;
 
-            // Pero con CSS le decimos que ocupe el tamaño visual normal
-            // Esto comprime los píxeles y genera la alta definición
             const visualViewport = page.getViewport({ scale: currentScale });
             pdfCanvas.style.width = Math.floor(visualViewport.width) + "px";
             pdfCanvas.style.height = Math.floor(visualViewport.height) + "px";
@@ -80,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     books.forEach(book => {
         book.addEventListener("click", () => {
+            // 🔥 LÓGICA DE PRÓXIMAMENTE 🔥
             if (book.classList.contains("proximamente")) {
                 alert("📚 Este libro estará disponible pronto 💕");
                 return;
@@ -172,11 +168,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Solo permitir deslizar el carrusel si el visor está cerrado
     let startX = 0;
-    document.addEventListener("touchstart", e => { startX = e.touches[0].clientX; });
-    document.addEventListener("touchend", e => {
-        let endX = e.changedTouches[0].clientX;
+    document.addEventListener("touchstart", e => { 
         if (!visor.classList.contains("activo")) {
+            startX = e.touches[0].clientX; 
+        }
+    }, {passive: false}); // passive false ayuda a bloquear rebotes indeseados
+
+    document.addEventListener("touchend", e => {
+        if (!visor.classList.contains("activo")) {
+            let endX = e.changedTouches[0].clientX;
             if (startX - endX > 50) rotate(1);
             else if (endX - startX > 50) rotate(-1);
         }
@@ -190,10 +192,19 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let i = 0; i < 2000; i++) {
         stars.push({ x: Math.random() * canvasGal.width - canvasGal.width / 2, y: Math.random() * canvasGal.height - canvasGal.height / 2, z: Math.random() * canvasGal.width });
     }
+    
     function animateGalaxy() {
         ctxGal.fillStyle = "black"; ctxGal.fillRect(0, 0, canvasGal.width, canvasGal.height); ctxGal.fillStyle = "white";
+        
+        let isReading = visor.classList.contains("activo");
+
         stars.forEach(star => {
-            star.z -= 0.3; star.x += galaxyVelocityX;
+            // 🔥 SI ESTÁS EN EL MENÚ LA GALAXIA SE QUEDA QUIETA. SI LEES, AVANZA 🔥
+            if (isReading) {
+                star.z -= 0.3; 
+            }
+            
+            star.x += galaxyVelocityX;
             if (star.z <= 0) { star.z = canvasGal.width; star.x = Math.random() * canvasGal.width - canvasGal.width / 2; star.y = Math.random() * canvasGal.height - canvasGal.height / 2; }
             if (star.x > canvasGal.width / 2) star.x = -canvasGal.width / 2;
             if (star.x < -canvasGal.width / 2) star.x = canvasGal.width / 2;
