@@ -1,3 +1,4 @@
+/* 🌌 BASE */
 body {
     margin: 0;
     background: #020617;
@@ -5,6 +6,10 @@ body {
     font-family: Arial;
     overflow: hidden;
     text-align: center;
+
+    /* ✨ suavizado de texto */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* 🌌 FONDO ESTRELLAS */
@@ -17,14 +22,17 @@ body {
     z-index: -1;
 }
 
-/* TÍTULO */
+/* 🌟 TÍTULO */
 .titulo {
     margin-top: 20px;
     font-size: 24px;
     color: #f1f5f9;
+
+    /* ✨ brillo suave */
+    text-shadow: 0 0 10px rgba(255,255,255,0.2);
 }
 
-/* CONTENEDOR */
+/* 📦 CONTENEDOR */
 .container {
     perspective: 1200px;
     width: 100%;
@@ -34,7 +42,7 @@ body {
     align-items: center;
 }
 
-/* CARRUSEL */
+/* 🎠 CARRUSEL */
 .carousel {
     width: 260px;
     height: 360px;
@@ -43,7 +51,7 @@ body {
     transition: transform 0.8s ease;
 }
 
-/* 🔥 LIBROS (VERSIÓN CORRECTA) */
+/* 📚 LIBROS */
 .book {
     position: absolute;
     top: 50%;
@@ -56,16 +64,21 @@ body {
 
     transform-style: preserve-3d;
 
-    /* 🔥 IMPORTANTE: usa variables */
+    /* 🔥 posición 3D */
     transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z));
 
     transition: transform 0.5s, box-shadow 0.5s;
 }
 
-/* 🔥 HOVER CORRECTO (NO ROMPE EL 3D) */
+/* ✨ HOVER */
 .book:hover {
     transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z)) scale(1.1);
     box-shadow: 0 0 25px rgba(255, 77, 166, 0.6);
+}
+
+/* 📱 CLICK (animación apertura) */
+.book:active {
+    transform: translate(-50%, -50%) rotateY(var(--rotate)) translateZ(var(--z)) scale(0.9);
 }
 
 .book img {
@@ -74,7 +87,7 @@ body {
     object-fit: cover;
 }
 
-/* BOTONES */
+/* 🔘 BOTONES */
 .controls {
     margin-top: 10px;
 }
@@ -100,7 +113,7 @@ button:hover {
     box-shadow: 0 0 20px rgba(255, 77, 166, 0.8);
 }
 
-/* TEXTO */
+/* 📝 TEXTO */
 .info {
     font-size: 13px;
     opacity: 0.6;
@@ -131,7 +144,6 @@ button:hover {
     filter: brightness(0.8);
 }
 
-/* 🔥 ETIQUETA SIN ROMPER 3D */
 .proximamente::after {
     content: "Próximamente";
     position: absolute;
@@ -152,4 +164,83 @@ button:hover {
     border-bottom-right-radius: 12px;
 
     pointer-events: none;
+}
+
+/* 📖 VISOR PDF */
+.visor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #020617;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.4s;
+
+    backdrop-filter: blur(10px);
+}
+
+/* 🔥 ACTIVO */
+.visor.activo {
+    opacity: 1;
+    pointer-events: auto;
+    animation: fadeIn 0.4s ease;
+}
+
+/* ✨ ANIMACIÓN */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 📖 HEADER */
+.visor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 14px;
+
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ❌ BOTÓN CERRAR */
+#cerrar {
+    background: #ff4da6;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#cerrar:hover {
+    background: #e60073;
+    box-shadow: 0 0 10px #ff4da6;
+}
+
+/* 📄 PDF */
+#pdfViewer {
+    width: 100%;
+    height: 100%;
+    border: none;
+
+    background: #0f172a; /* modo lectura cómodo */
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
 }

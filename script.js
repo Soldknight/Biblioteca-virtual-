@@ -35,7 +35,35 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const pdf = book.dataset.pdf;
-            window.open(pdf, "_blank");
+           const visor = document.getElementById("visor");
+const pdfViewer = document.getElementById("pdfViewer");
+const cerrar = document.getElementById("cerrar");
+const titulo = document.getElementById("tituloLibro");
+
+books.forEach(book => {
+    book.addEventListener("click", () => {
+
+        if (book.classList.contains("proximamente")) {
+            alert("📚 Este libro estará disponible pronto 💕");
+            return;
+        }
+
+        const pdf = book.dataset.pdf;
+
+        // 📖 abrir visor
+        visor.classList.add("activo");
+        pdfViewer.src = pdf;
+
+        // título dinámico
+        titulo.textContent = pdf.split("/").pop();
+    });
+});
+
+// ❌ cerrar visor
+cerrar.addEventListener("click", () => {
+    visor.classList.remove("activo");
+    pdfViewer.src = "";
+});
         });
     });
 
